@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tempus.Linq", "Tempus.Linq\Tempus.Linq.csproj", "{5BA0DACE-37B7-4ACA-B9A1-E8BE4F58392F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tempus.Linq.Tests", "Tempus.Linq.Tests\Tempus.Linq.Tests.csproj", "{23EC8B88-2EFE-41BF-A594-7B1B3260C332}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5BA0DACE-37B7-4ACA-B9A1-E8BE4F58392F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BA0DACE-37B7-4ACA-B9A1-E8BE4F58392F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BA0DACE-37B7-4ACA-B9A1-E8BE4F58392F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BA0DACE-37B7-4ACA-B9A1-E8BE4F58392F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23EC8B88-2EFE-41BF-A594-7B1B3260C332}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23EC8B88-2EFE-41BF-A594-7B1B3260C332}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23EC8B88-2EFE-41BF-A594-7B1B3260C332}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23EC8B88-2EFE-41BF-A594-7B1B3260C332}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
