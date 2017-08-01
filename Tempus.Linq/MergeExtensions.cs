@@ -1,14 +1,22 @@
 ﻿namespace Tempus.Linq
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public static class MergeExtensions
     {
-        public static DiffResultEditable<TLeft, TRight> ForAdditions<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TRight> action)
+        /// <summary>
+        /// Performs the specified action on each element present only on the second sequence. 
+        /// These elements will be added to the first sequence on a merge operation.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences. </param>
+        /// <param name="action">
+        /// The System.Action delegate to perform on each element present only on the second sequence. 
+        /// These elements will be added to the first sequence on a merge operation.
+        /// </param>
+        /// <returns></returns>
+        public static DiffResultEditable<TLeft, TRight> ForEachAddition<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TRight> action)
         {
             foreach (var right in source.OnlyRight)
             {
@@ -18,7 +26,19 @@
             return source;
         }
 
-        public static DiffResultEditable<TLeft, TRight> ForChanges<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TRight, TLeft> action)
+        /// <summary>
+        /// Performs the specified action on each element present only on the second sequence. 
+        /// These elements will be merge on a single element to the first sequence on a merge operation.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences. </param>
+        /// <param name="action">
+        /// The System.Action delegate to perform on each element present only on the second sequence. 
+        /// These elements will be merge on a single element to the first sequence on a merge operation.
+        /// </param>
+        /// <returns></returns>
+        public static DiffResultEditable<TLeft, TRight> ForEachChange<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TRight, TLeft> action)
         {
             foreach (var both in source.Both)
             {
@@ -28,7 +48,19 @@
             return source;
         }
 
-        public static DiffResultEditable<TLeft, TRight> ForDeletions<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TLeft> action)
+        /// <summary>
+        /// Performs the specified action on each element present only on the second sequence. 
+        /// These elements will be deleted from the first sequence on a merge operation.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="action">
+        /// The System.Action delegate to perform on each element present only on the second sequence. 
+        /// These elements will be deleted from the first sequence on a merge operation.
+        /// </param>
+        /// <returns></returns>
+        public static DiffResultEditable<TLeft, TRight> ForEachDeletion<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TLeft> action)
         {
             foreach (var left in source.OnlyLeft)
             {
@@ -38,11 +70,25 @@
             return source;
         }
 
+        /// <summary>
+        /// Add to the first sequence all the elements present only on the second sequence.
+        /// </summary>
+        /// <typeparam name="T">The type of elements of the sequences.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <returns></returns>
         public static DiffResultEditable<T, T> MergeAdditions<T>(this DiffResultEditable<T, T> source)
         {
             return MergeAdditions(source, r => r);
         }
 
+        /// <summary>
+        /// Add to the first sequence all the elements present only on the second sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="factory">A function to create a element to the first sequence based on a element present only on the second sequence.</param>
+        /// <returns></returns>
         public static DiffResultEditable<TLeft, TRight> MergeAdditions<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Func<TRight, TLeft> factory)
         {
             if (source == null)
@@ -61,7 +107,16 @@
             return source;
         }
 
+        /// <summary>
+        /// Apply changes on a element of the first sequence based on the matching element on the second sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="mapChanges">A function apply changes on a element of the first sequence based on the matching element on the second sequence.</param>
+        /// <returns></returns>
         public static DiffResultEditable<TLeft, TRight> MergeChanges<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TLeft, TRight> mapChanges)
+            where TLeft: class
         {
             return MergeChanges(source, (left, right) =>
             {
@@ -70,6 +125,14 @@
             });
         }
 
+        /// <summary>
+        /// Add to the first sequence a result element from two matching elements.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="mapChanges">A function to create a result element from two matching elements.</param>
+        /// <returns></returns>
         public static DiffResultEditable<TLeft, TRight> MergeChanges<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Func<TLeft, TRight, TLeft> mapChanges)
         {
             if (source == null)
@@ -92,6 +155,13 @@
             return source;
         }
 
+        /// <summary>
+        /// Delete from the first sequence all the elements present only on the first sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <returns></returns>
         public static DiffResultEditable<TLeft, TRight> MergeDeletions<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source)
         {
             if (source == null)
@@ -105,6 +175,11 @@
             return source;
         }
 
+        /// <summary>
+        /// Apply the additions, changes e deletions to the first sequence.
+        /// </summary>
+        /// <typeparam name="T">The type of elements of the sequences.</typeparam>
+        /// <param name="source"></param>
         public static void MergeAll<T>(this DiffResultEditable<T, T> source)
         {
             source
@@ -112,6 +187,13 @@
                 .MergeDeletions();
         }
 
+        /// <summary>
+        /// Apply the additions, changes e deletions to the first sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="mapAdditionsAndChanges">A function to map a element added or changed on the first sequence based on matching element on the second sequence or on a element present only on the second sequence.</param>
         public static void MergeAll<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TLeft, TRight> mapAdditionsAndChanges)
             where TLeft : class, new()
         {
