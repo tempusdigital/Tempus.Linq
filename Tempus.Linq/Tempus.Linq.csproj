@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+    <Authors>Tempus Digital</Authors>
+    <Company>Tempus Digital</Company>
+    <Description>Linq extensions used on Tempus Digital's projects.</Description>
+    <Copyright>Copyright 2017 Tempus Digital LDTA ME</Copyright>
+    <PackageLicenseUrl>https://github.com/tempusdigital/Tempus.Linq/blob/master/LICENCE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/tempusdigital/Tempus.Linq</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/tempusdigital/Tempus.Linq/master/Tempus.Linq/logo-64.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/tempusdigital/Tempus.Linq</RepositoryUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageTags>linq linq-extensions csharp dotnet master-detail</PackageTags>
   </PropertyGroup>
 
 </Project>
