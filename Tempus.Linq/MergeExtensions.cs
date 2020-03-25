@@ -1,6 +1,7 @@
 ﻿namespace Tempus.Linq
 {
     using System;
+    using System.Threading.Tasks;
 
     public static class MergeExtensions
     {
@@ -108,6 +109,30 @@
         }
 
         /// <summary>
+        /// Add to the first sequence all the elements present only on the second sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="factory">A function to create a element to the first sequence based on a element present only on the second sequence.</param>
+        /// <returns></returns>
+        public static async Task MergeAdditionsAsync<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Func<TRight, Task<TLeft>> factory)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            foreach (var add in source.OnlyRight)
+            {
+                var newItem = await factory(add);
+                if (newItem != null)
+                    source.SourceLeft.Add(newItem);
+            }
+        }
+
+        /// <summary>
         /// Apply changes on a element of the first sequence based on the matching element on the second sequence.
         /// </summary>
         /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
@@ -116,7 +141,7 @@
         /// <param name="mapChanges">A function apply changes on a element of the first sequence based on the matching element on the second sequence.</param>
         /// <returns></returns>
         public static DiffResultEditable<TLeft, TRight> MergeChanges<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Action<TLeft, TRight> mapChanges)
-            where TLeft: class
+            where TLeft : class
         {
             return MergeChanges(source, (left, right) =>
             {
@@ -154,6 +179,54 @@
 
             return source;
         }
+
+        /// <summary>
+        /// Apply changes on a element of the first sequence based on the matching element on the second sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="mapChanges">A function apply changes on a element of the first sequence based on the matching element on the second sequence.</param>
+        /// <returns></returns>
+        public static async Task MergeChangesAsync<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Func<TLeft, TRight, Task> mapChanges)
+            where TLeft : class
+        {
+            await MergeChangesAsync(source, async (left, right) =>
+            {
+                await mapChanges(left, right);
+                return left;
+            });
+        }
+
+        /// <summary>
+        /// Add to the first sequence a result element from two matching elements.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="mapChanges">A function to create a result element from two matching elements.</param>
+        /// <returns></returns>
+        public static async Task MergeChangesAsync<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Func<TLeft, TRight, Task<TLeft>> mapChanges)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            if (mapChanges == null)
+                throw new ArgumentNullException(nameof(mapChanges));
+
+            foreach (var change in source.Both)
+            {
+                var newLeft = await mapChanges(change.Left, change.Right);
+
+                if (!Object.ReferenceEquals(change.Left, newLeft))
+                {
+                    source.SourceLeft.Remove(change.Left);
+                    source.SourceLeft.Add(newLeft);
+                }
+            }
+        }
+
+
 
         /// <summary>
         /// Delete from the first sequence all the elements present only on the first sequence.
@@ -206,6 +279,28 @@
                 })
                 .MergeChanges(mapAdditionsAndChanges)
                 .MergeDeletions();
+        }
+
+        /// <summary>
+        /// Apply the additions, changes e deletions to the first sequence.
+        /// </summary>
+        /// <typeparam name="TLeft">The type of the elements of the first sequence.</typeparam>
+        /// <typeparam name="TRight">The type of the elements of the second sequence.</typeparam>
+        /// <param name="source">The result of the comparison of the two sequences.</param>
+        /// <param name="mapAdditionsAndChanges">A function to map a element added or changed on the first sequence based on matching element on the second sequence or on a element present only on the second sequence.</param>
+        public static async Task MergeAllAsync<TLeft, TRight>(this DiffResultEditable<TLeft, TRight> source, Func<TLeft, TRight, Task> mapAdditionsAndChanges)
+            where TLeft : class, new()
+        {
+            await source.MergeAdditionsAsync(async r =>
+            {
+                var l = new TLeft();
+                await mapAdditionsAndChanges(l, r);
+                return l;
+            });
+
+            await source.MergeChangesAsync(mapAdditionsAndChanges);
+
+            source.MergeDeletions();
         }
     }
 }

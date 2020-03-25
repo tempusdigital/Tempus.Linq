@@ -3,6 +3,8 @@
     using Shouldly;
     using System;
     using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Xunit;
 
     public class MergeTests
@@ -70,6 +72,26 @@
         }
 
         [Fact]
+        public async Task Merge_Additions_Async_Of_Different_Types()
+        {
+            var diff = DiffOfDifferentTypes();
+
+            Func<Item<string>, Task<Item<int>>> factory = async right =>
+            {
+                await Task.Delay(100);
+
+                var i = int.Parse(right.Value);
+                return new Item<int>(i);
+            };
+
+            await diff.MergeAdditionsAsync(factory);
+
+            var result = diff.SourceLeft.Select(a => a.Value);
+
+            result.ShouldBe(new[] { 1, 2, 3, 4, 5, 6 });
+        }
+
+        [Fact]
         public void Merge_Deletions_Of_Same_Type()
         {
             var diff = DiffOfSameType();
@@ -124,6 +146,23 @@
         }
 
         [Fact]
+        public async Task Merge_Changes_Async_And_Change_Left_Value_Reference()
+        {
+            var diff = DiffOfDifferentTypes();
+
+            await diff.MergeChangesAsync(async (left, right) =>
+            {
+                await Task.Delay(100);
+
+                return new Item<int>(left.Value * 100);
+            });
+
+            var result = diff.SourceLeft.Select(a => a.Value);
+
+            result.ShouldBe(new[] { 1, 2, 300, 400 });
+        }
+
+        [Fact]
         public void Merge_All_Of_Same_Type()
         {
             var diff = DiffOfSameType();
@@ -134,7 +173,7 @@
 
             result.ShouldBe(new[] { 3, 4, 5, 6 });
         }
-
+        
         [Fact]
         public void Merge_All_Of_Different_Types()
         {
@@ -143,6 +182,26 @@
             diff.MergeAll((left, right) =>
             {
                 left.Value = int.Parse(right.Value) * 10;
+            });
+
+            var result = diff.SourceLeft.Select(a => a.Value);
+
+            result.ShouldBe(new[] { 30, 40, 50, 60 });
+        }
+
+        [Fact]
+        public async Task Merge_All_Async_Of_Different_Types()
+        {
+            var diff = DiffOfDifferentTypes();
+
+            await diff.MergeAllAsync(async (left, right) =>
+            {
+                await Task.Run(async () =>
+                {
+                    await Task.Delay(100);
+
+                    left.Value = int.Parse(right.Value) * 10;
+                });
             });
 
             var result = diff.SourceLeft.Select(a => a.Value);
